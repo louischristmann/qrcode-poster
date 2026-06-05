@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En savoir plus - Louis Christmann</title>
+    <link rel="stylesheet" href="savoirplus.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <nav>
+                <div class="nav-links">
+                    <span class="badge">Louis Christmann | BUT RT Cybersécurité</span>
+                    <a href="https://www.linkedin.com/in/louis-christmann-94b1a62aa/" target="_blank" class="linkedin-link">LinkedIn</a>
+                </div>
+            </nav>
+            <h1>En savoir plus sur mon stage</h1>
+            <h3>Comment automatiser, sécuriser et superviser un parc de commutateurs industriels Cisco ? Voici les coulisses techniques de mon projet.</h3>
+        </header>
+
+        <section class="card">
+            <h2> Le Défi Technique</h2>
+            <p>
+                En milieu industriel, de nombreux équipements (automates, capteurs) ne communiquent pas via les protocoles de découverte classiques comme Cisco CDP et n'apparaissent pas toujours dans la table de routage IP s'ils communiquent en local.
+            </p>
+            <p>
+                <strong>La solution :</strong> Développer un outil en Python qui interroge directement la couche physique (Table MAC) du commutateur, puis qui croise ces données avec la table ARP pour identifier 100% des équipements branchés sur les ports.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2> Extrait du Code Python (Netmiko)</h2>
+            
+            <div class="disclaimer">
+                 Note de sécurité : L'extrait de code ci-dessous a été volontairement tronqué et anonymisé (masquage des expressions régulières IP complètes et des noms de variables internes) afin de respecter la politique de cybersécurité de l'entreprise.
+            </div>
+
+            <pre><code># 1. Récupération de la table des adresses MAC (Couche 2)
+mac_output = net_connect.send_command("show mac address-table")
+mac_entries = []
+
+for line in mac_output.splitlines():
+    # Capture Regex : VLAN | MAC | Type | Port
+    match_mac = re.search(r"(\d+|All)\s+([0-9a-fA-F\.]{14})\s+\S+\s+(\S+)", line)
+    
+    # On isole les ports physiques (exclusion du CPU)
+    if match_mac and match_mac.group(3).lower() != "cpu":
+        mac_entries.append({
+            'mac': match_mac.group(2),
+            'port': match_mac.group(3)
+        })
+
+# 2. Corrélation avec la table ARP (Couche 3)
+arp_output = net_connect.send_command("show arp")
+arp_dict = {}
+
+for line in arp_output.splitlines():
+    # Anonymisation du pattern IP local
+    match_arp = re.search(r"Internet\s+(10\.\d{1,3}\.X\.X)\s+.*?\s+([0-9a-fA-F\.]{14})", line)
+    if match_arp:
+        arp_dict[match_arp.group(2)] = match_arp.group(1) # Association {MAC: IP}
+
+# -> Le script fusionne ensuite ces données pour afficher un inventaire complet.</code></pre>
+        </section>
+
+        <section class="conclusion">
+            <h2> Conclusion</h2>
+            <p>
+                Ce stage m'a permis de développer une solution innovante pour la gestion d'un parc de commutateurs industriels, en combinant des compétences en réseau, en programmation Python et en cybersécurité.
+            </p>
+            <p>J'ai pu découvrir les logiciels cacti et netmiko pour ainsi repéré les adresses IP des équipements connectés.</p>
+            <p>
+                En automatisant la découverte des équipements connectés, j'ai contribué à renforcer la sécurité et l'efficacité opérationnelle du réseau industriel de l'entreprise.
+            </p>
+        </section>
+
+        <div class="btn-container">
+            <a href="https://www.linkedin.com/in/louis-christmann-94b1a62aa/" target="_blank" class="btn btn-primary"> Me contacter sur LinkedIn</a>
+            <a href="CV.pdf" class="btn btn-outline" target="_blank"> Télécharger mon CV</a>
+        </div>
+
+
+        <footer>
+            &copy; 2026 - Louis Christmann. Projet réalisé dans le cadre du BUT R&T.
+        </footer>
+    </div>
+
+</body>
+</html>
