@@ -26,12 +26,12 @@
                 En milieu industriel, de nombreux équipements (automates, capteurs) ne communiquent pas via les protocoles de découverte classiques comme Cisco CDP et n'apparaissent pas toujours dans la table de routage IP s'ils communiquent en local.
             </p>
             <p>
-                <strong>La solution :</strong> Développer un outil en Python qui interroge directement la couche physique (Table MAC) du commutateur, puis qui croise ces données avec la table ARP pour identifier 100% des équipements branchés sur les ports.
+                <strong>La solution :</strong> Développer un outil en Python qui interroge directement la couche physique (Table MAC) du commutateur, puis qui croise ces données avec la table ARP pour identifier 100% des équipements branchés sur les ports avec leurs noms et leurs adresses.
             </p>
         </section>
 
         <section class="card">
-            <h2> Extrait du Code Python (Netmiko)</h2>
+            <h2> Extrait du Code Python (trouver le nom des voisins)</h2>
             
             <div class="disclaimer">
                  Note de sécurité : L'extrait de code ci-dessous a été volontairement tronqué et anonymisé (masquage des expressions régulières IP complètes et des noms de variables internes) afin de respecter la politique de cybersécurité de l'entreprise.
