@@ -65,6 +65,70 @@ for line in arp_output.splitlines():
 # -> Le script fusionne ensuite ces données pour afficher un inventaire complet.</code></pre>
         </section>
 
+        <section class="card">
+            <h2>🔌 Outil d'Injection Automatique (Liaison Série)</h2>
+            <p>
+                Afin de simplifier le déploiement des commutateurs industriels IE-2000 fraîchement sortis d'usine, ce script automatise la détection matérielle et l'envoi des fichiers de configuration.
+            </p>
+            <p>
+                <strong>La valeur ajoutée :</strong> Plus besoin de chercher manuellement le numéro de port COM dans le Gestionnaire de périphériques Windows. Le script scanne les descriptions matérielles, identifie le câble console Cisco et pousse l'intégralité de la configuration d'usine via Netmiko.
+            </p>
+            
+            <div class="disclaimer">
+                🔒 Note de sécurité : Les chemins réseau d'accès aux configurations ont été anonymisés.
+            </div>
+
+            <pre><code># 1. Détection automatique du câble console branché sur le PC
+ports = list(serial.tools.list_ports.comports())
+port_console = None
+
+for port in ports:
+    if "USB" in port.description or "Serial" in port.description or "Cisco" in port.description:
+        port_console = port.device
+        break
+
+# 2. Connexion et injection de la configuration d'usine
+switch_console = {
+    'device_type': 'cisco_ios_serial',
+    'serial_settings': {
+        'port': port_console,
+        'baudrate': 9600
+    }
+}
+
+net_connect = ConnectHandler(**switch_console)
+net_connect.enable()
+
+# Téléversement de la configuration depuis le répertoire sécurisé
+output = net_connect.send_config_from_file(fichier_config)
+net_connect.send_command("write memory")
+net_connect.disconnect()</code></pre>
+        </section>
+
+        <section class="card">
+            <h2>🚨 Simulateur de Pannes Réseau (Lab Cybersécurité)</h2>
+            <p>
+                Développé pour la plateforme de formation interne, cet outil permet d'injecter des anomalies réseau contrôlées sur un poste de travail Windows pour tester la résilience des applications industrielles.
+            </p>
+            <p>
+                <strong>La valeur ajoutée :</strong> Ce script Python fait office de passerelle en pilotant l'API PowerShell de Windows (via `subprocess`) pour manipuler les tables de routage, le pare-feu local ou l'état des interfaces réseau sans intervention manuelle.
+            </p>
+
+            <pre><code># Création d'un trou noir (Blackhole) pour couper une route spécifique
+def route_add_blackhole(iface, dest_cidr, nexthop="192.0.2.1"):
+    # 192.0.2.0/24 correspond à TEST-NET-1 (non routable), idéal pour absorber le trafic
+    ps(rf'New-NetRoute -InterfaceAlias "{iface}" -DestinationPrefix "{dest_cidr}" -NextHop "{nexthop}"')
+
+# Simulation d'une micro-coupure physique (Interface Flapping)
+def flap_iface(iface, down_s, up_s, cycles):
+    for i in range(cycles):
+        print(f"--- Flap {i+1}/{cycles}: DOWN {down_s}s / UP {up_s}s")
+        ps(rf'Disable-NetAdapter -Name "{iface}" -Confirm:$false')
+        time.sleep(down_s)
+        ps(rf'Enable-NetAdapter -Name "{iface}" -Confirm:$false')
+        time.sleep(up_s)</code></pre>
+        </section>
+
         <section class="conclusion">
             <h2> Conclusion</h2>
             <p>
